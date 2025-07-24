@@ -1,3 +1,4 @@
+mongoengine
 bcrypt==4.3.0
 blinker==1.9.0
 certifi==2025.6.15
