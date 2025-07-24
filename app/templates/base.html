@@ -100,17 +100,34 @@
     </div>
   </nav>
 
-  <div class="container mt-4">
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-          {{ message }}
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-      {% endfor %}
-    {% endif %}
-  {% endwith %}
+
+  <!-- Flash messages bottom right -->
+  <div id="flash-messages-container" style="position: fixed; bottom: 24px; right: 24px; z-index: 1055; min-width: 250px; max-width: 350px;">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} fade show py-2 px-3 small mb-2" role="alert" style="box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
 
   {% block content %}{% endblock %}
 </div>
+
+<script>
+  // Auto-dismiss flash messages after 3 seconds (vanilla JS fade-out)
+  window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+      document.querySelectorAll('#flash-messages-container .alert').forEach(function(alert) {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(function() {
+          alert.remove();
+        }, 500);
+      });
+    }, 3000);
+  });
+</script>

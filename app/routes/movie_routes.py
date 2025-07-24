@@ -4,7 +4,7 @@ from app.forms.forms import SearchForm
 from app.utils.tmdb import fetch_tmdb_results
 from app.utils.recommender import get_user_recommendations
 from app.models.models import UserSearch
-from app import db
+
 import re
 from app.utils.history_recommender import recommend_from_history
 import requests
@@ -51,9 +51,9 @@ def search():
             flash("No results found for that search.", "warning")
 
         # Save user search to DB
-        search_record = UserSearch(movie_title=query, user_id=current_user.id)
-        db.session.add(search_record)
-        db.session.commit()
+        from app.models.models import User
+        search_record = UserSearch(movie_title=query, user=current_user._get_current_object())
+        search_record.save()
 
         # Get recommendations based on history
         recommended_df = recommend_from_history([query], top_n=8)

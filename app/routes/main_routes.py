@@ -4,7 +4,7 @@ from app.forms.forms import SearchForm
 from app.utils.tmdb import fetch_tmdb_results
 from app.utils.recommender import get_user_recommendations
 from app.models.models import UserSearch
-from app import db
+
 import requests
 
 main = Blueprint('main', __name__)
@@ -25,15 +25,14 @@ def home():
         print("Trending fetch failed:", e)
         flash("Failed to load trending movies", "warning")
 
-    most_searched = (
-        db.session.query(UserSearch.movie_title, db.func.count(UserSearch.movie_title).label('count'))
-        .group_by(UserSearch.movie_title)
-        .order_by(db.desc('count'))
-        .limit(20)
-        .all()
-    )
-
-    most_searched_titles = [row.movie_title for row in most_searched]
+    # MongoEngine aggregation for most searched movies
+    pipeline = [
+        {"$group": {"_id": "$movie_title", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}},
+        {"$limit": 20}
+    ]
+    most_searched = list(UserSearch.objects.aggregate(*pipeline))
+    most_searched_titles = [row['_id'] for row in most_searched]
     seen_titles = set()
     unique_titles = []
     for title in most_searched_titles:

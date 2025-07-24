@@ -52,10 +52,15 @@
         {% for rec in recommended_movies %}
         <div class="me-3" style="min-width: 200px;">
           <div class="card h-100">
-            <a href="{{ url_for('movie.movie_detail', movie_id=rec['id']) }}">
+            {% if rec.id %}
+              <a href="{{ url_for('movie.movie_detail', movie_id=rec['id']) }}">
+                <img src="{{ rec.poster_path and 'https://image.tmdb.org/t/p/w500' ~ rec.poster_path or url_for('static', filename='default-poster.png') }}"
+                     class="card-img-top" alt="{{ rec.title }} poster">
+              </a>
+            {% else %}
               <img src="{{ rec.poster_path and 'https://image.tmdb.org/t/p/w500' ~ rec.poster_path or url_for('static', filename='default-poster.png') }}"
                    class="card-img-top" alt="{{ rec.title }} poster">
-            </a>
+            {% endif %}
             <div class="card-body">
               <h6 class="card-title">{{ rec.title }}</h6>
               <p class="card-text small">{{ rec.overview[:100] }}{% if rec.overview|length > 100 %}...{% endif %}</p>

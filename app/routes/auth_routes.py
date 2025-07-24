@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user, login_required
-from app import db, bcrypt
+from app import bcrypt
 from app.models.models import User
 from app.forms.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from app.utils.helpers import save_picture
@@ -16,8 +16,7 @@ def register():
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(user)
-        db.session.commit()
+        user.save()
         flash('Account created successfully! Please log in to continue.', 'success')
         return redirect(url_for('auth.login'))
     return render_template('register.html', form=form)
@@ -28,7 +27,8 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.objects(email=form.email.data).first()
+        # ...existing code...
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
@@ -63,7 +63,7 @@ def account():
 
         current_user.username = form.username.data
         current_user.email = form.email.data
-        db.session.commit()
+        current_user.save()
         flash('Your profile has been updated successfully.', 'success')
         return redirect(url_for('auth.account'))
 
